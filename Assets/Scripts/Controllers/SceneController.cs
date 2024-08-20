@@ -1,13 +1,15 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using System;
 using UnityEngine.SceneManagement;
 
 public class SceneController : MonoBehaviour
 {
-    delegate void meth();
     bool ManualReturn = true;
-    string _currentSceneName;
+
+    AssetReference _currentScene;
+    private string _sceneName;
 
     private void Awake()
     {
@@ -24,18 +26,22 @@ public class SceneController : MonoBehaviour
     public static SceneController Instance { get => _instance; }
 
 
-    public void OpenScene(string sceneName)
+    public void OpenScene(AssetReference sceneRef)
     {
-        _currentSceneName = sceneName;
-        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        Addressables.LoadSceneAsync(sceneRef, LoadSceneMode.Single).Completed += ((x) => 
+        {
+            _sceneName = SceneManager.GetActiveScene().name;
+            Debug.Log(_sceneName);
+        }) ;
+        _currentScene = sceneRef;
+        
     }
     
     public void OpenMainMenu() => SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
     public void OpenMainMenu(float delay) => StartCoroutine(Delay(delay,OpenMainMenu));
-    public void ReOpenScene() => SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+    public void ReOpenScene() => Addressables.LoadSceneAsync(_currentScene, LoadSceneMode.Single);
     public void ReOpenScene(float delay) => StartCoroutine(Delay(delay,ReOpenScene));
-    public string currentSceneName => _currentSceneName;
-
+    public string currentSceneName => _sceneName;
 
     private void Update()
     {
@@ -54,14 +60,14 @@ public class SceneController : MonoBehaviour
         }
     }
 
-    IEnumerator Delay(float delay, meth method)
+    IEnumerator Delay(float delay, Action action)
     {
         ManualReturn = false;
 
         yield return new WaitForSeconds(delay);
 
         ManualReturn = true;
-        method();
+        action();
     }
 
 }

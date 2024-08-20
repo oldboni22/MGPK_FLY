@@ -8,16 +8,21 @@ public class AudioController : MonoBehaviour
     void Start()
     {   
         source = GetComponent<AudioSource>();
-        StartCoroutine(Play(Storage.instance.Audio.RandomMenuClip()));
+        StartCoroutine(Play());
     }
 
-    IEnumerator Play(AudioClip clip)
+
+    IEnumerator Play()
     {
+
+        yield return new WaitWhile(() => Storage.instance == null);
+        var clip = Storage.instance.Audio.RandomMenuClip();
+
         source.clip = clip;
         source.Play();
         yield return new WaitForSeconds(clip.length);
 
-        StartCoroutine(Play(Storage.instance.Audio.RandomMenuClip()));
+        StartCoroutine(Play());
     }
 
 }

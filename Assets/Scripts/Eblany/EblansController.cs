@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class EblansController : MonoBehaviour
@@ -13,10 +14,19 @@ public class EblansController : MonoBehaviour
     void Start()
     {
         DOTween.SetTweensCapacity(200,100);
-        for(int i = 0; i < PlayerPrefs.GetInt("EblansCount"); i++) 
+        StartCoroutine(SpawnAtLoad());
+    }
+
+    IEnumerator SpawnAtLoad()
+    {
+        yield return new WaitWhile(() => Storage.instance == null);
+
+        for (int i = 0; i < PlayerPrefs.GetInt("EblansCount"); i++)
         {
             Plus(false);
+            yield return new WaitForSeconds(.05f);
         }
+       
     }
 
     void Save()
